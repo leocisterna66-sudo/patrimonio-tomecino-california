@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patrimonio Tomecino — Juego de Tarjetas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:   #ffd166;
+  --mint:   #06d6a0;
+  --red:    #ef476f;
+  --blue:   #118ab2;
+  --dark:   #07101f;
+  --panel:  rgba(7,16,40,0.88);
+  --glass:  rgba(12,30,75,0.82);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  background: var(--dark);
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* ── PANTALLAS ──────────────────────────────── */
+.pantalla {
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 100vh; gap: 20px; padding: 32px;
+  text-align: center;
+}
+.pantalla.activa { display: flex; }
+
+/* ── INICIO ─────────────────────────────────── */
+#inicio {
+  background: radial-gradient(ellipse at 50% 40%, rgba(8,14,45,0.70) 0%, rgba(3,7,20,0.92) 100%),
+              url('fondo-1.png') center/cover fixed;
+  gap: 30px;
+}
+
+.inicio-logo {
+  animation: float 3s ease-in-out infinite;
+}
+.inicio-logo img {
+  width: 140px;
+  height: auto;
+  filter: drop-shadow(0 0 32px rgba(255,209,102,0.6)) drop-shadow(0 8px 24px rgba(0,0,0,0.7));
+}
+@keyframes float {
+  0%,100%{ transform: translateY(0); }
+  50%    { transform: translateY(-14px); }
+}
+
+#inicio h1 {
+  font-size: 4rem; font-weight: 900; color: var(--gold);
+  text-shadow: 0 4px 28px rgba(0,0,0,.9), 0 0 80px rgba(255,209,102,.5);
+  letter-spacing: -1px; line-height: 1.05;
+}
+#inicio .subtitulo {
+  font-size: 1rem; font-weight: 600; color: rgba(255,209,102,.55);
+  text-transform: uppercase; letter-spacing: 5px; margin-top: -18px;
+}
+
+/* ── MODO CARDS ─────────────────────────────── */
+.modos-wrap {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px; width: 100%; max-width: 700px;
+}
+@media (min-width: 1100px) {
+  .modos-wrap { grid-template-columns: repeat(4, 1fr); max-width: 1120px; gap: 24px; }
+}
+
+.modo-card {
+  background: rgba(8,18,58,0.88);
+  backdrop-filter: blur(14px);
+  border: 2px solid rgba(255,209,102,0.18);
+  border-radius: 24px; padding: 36px 24px;
+  cursor: pointer;
+  transition: all .28s cubic-bezier(.34,1.56,.64,1);
+  text-align: center; position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 210px;
+}
+.modo-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(145deg, rgba(255,209,102,.1), transparent 60%);
+  opacity: 0; transition: opacity .25s;
+}
+.modo-card:hover {
+  border-color: var(--gold); transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 24px 60px rgba(0,0,0,.65), 0 0 40px rgba(255,209,102,.2);
+}
+.modo-card:hover::before { opacity: 1; }
+.modo-card.seleccionado {
+  border-color: var(--gold); background: rgba(20,50,135,.94);
+  box-shadow: 0 0 0 3px rgba(255,209,102,.4), 0 16px 50px rgba(0,0,0,.5);
+}
+.modo-card.seleccionado::before { opacity: 1; }
+
+.modo-icono {
+  font-size: 3.4rem; margin-bottom: 14px;
+  filter: drop-shadow(0 3px 12px rgba(0,0,0,.5));
+}
+.modo-nombre { font-size: 1.1rem; font-weight: 800; color: var(--gold); margin-bottom: 10px; }
+.modo-desc   { font-size: .82rem; color: #b8d4f0; line-height: 1.6; }
+
+/* ── RONDAS ─────────────────────────────────── */
+.config-label {
+  font-size: .8rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: rgba(255,255,255,.5); margin-bottom: 10px;
+}
+.opciones-ronda { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.btn-ronda {
+  padding: 9px 20px; border-radius: 50px;
+  font-size: .88rem; font-weight: 700; font-family: 'Poppins', sans-serif;
+  border: 2px solid rgba(255,209,102,.4);
+  background: transparent; color: var(--gold);
+  cursor: pointer; transition: all .2s;
+}
+.btn-ronda:hover { background: rgba(255,209,102,.15); border-color: var(--gold); }
+.btn-ronda.activo { background: var(--gold); color: #07101f; border-color: var(--gold); box-shadow: 0 4px 16px rgba(255,209,102,.4); }
+
+/* ── INPUTS EQUIPO ──────────────────────────── */
+.equipo-input-box {
+  border-radius: 16px; padding: 14px 26px; min-width: 160px;
+}
+.equipo-input-box.rojo { background: rgba(100,20,40,.7); border: 2px solid var(--red); }
+.equipo-input-box.azul { background: rgba(15,30,100,.7); border: 2px solid var(--blue); }
+.equipo-input-box .eq-tag { font-size: .7rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 4px; }
+.equipo-input-box.rojo .eq-tag { color: var(--red); }
+.equipo-input-box.azul .eq-tag { color: var(--blue); }
+.equipo-input-box input {
+  background: transparent; border: none; color: #fff;
+  font-size: 1.15rem; font-weight: 800; font-family: 'Poppins', sans-serif;
+  text-align: center; width: 130px; outline: none;
+}
+
+/* ── BOTONES ─────────────────────────────────── */
+.btn {
+  padding: 13px 32px; border: none; border-radius: 50px;
+  font-size: 1rem; font-weight: 700; font-family: 'Poppins', sans-serif;
+  cursor: pointer; transition: all .2s; letter-spacing: .3px;
+}
+.btn:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.btn:active { transform: translateY(-1px); }
+.btn-amarillo { background: linear-gradient(135deg,#ffe085,#ffc535); color: #07101f; box-shadow: 0 4px 20px rgba(255,209,102,.3); }
+.btn-verde    { background: linear-gradient(135deg,#09f7c0,#05b388); color: #021a12; }
+.btn-rojo     { background: linear-gradient(135deg,#ff6b8a,#d42b55); color: #fff; }
+.btn-gris     { background: rgba(255,255,255,.12); color: #cce4ff; border: 1px solid rgba(255,255,255,.2); }
+.btn-azul     { background: linear-gradient(135deg,#2eb5e8,#0d78a8); color: #fff; }
+
+/* ── CABECERA ───────────────────────────────── */
+#cabecera, #cabecera-vof {
+  background: rgba(5,12,35,.95);
+  backdrop-filter: blur(12px);
+  padding: 10px 20px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+  border-bottom: 2px solid rgba(255,209,102,.4);
+  width: 100%;
+  box-shadow: 0 2px 20px rgba(0,0,0,.4);
+}
+#cabecera h2, #cabecera-vof h2 {
+  font-size: 1rem; font-weight: 800;
+  color: var(--gold); letter-spacing: .5px;
+}
+
+/* marcador normal */
+#marcador-normal { display: flex; gap: 16px; align-items: center; }
+.score-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.08);
+  padding: 5px 14px; border-radius: 50px;
+  font-size: .9rem; font-weight: 700;
+}
+.score-chip .score-num { font-size: 1.2rem; font-weight: 900; }
+.score-chip.correctas .score-num  { color: var(--mint); }
+.score-chip.incorrectas .score-num{ color: var(--red); }
+
+/* marcador equipos */
+#marcador-equipos { display: flex; gap: 10px; align-items: center; }
+.equipo-score {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 5px 16px; border-radius: 12px; font-weight: 800;
+  min-width: 70px;
+}
+.eq-nombre { font-size: .65rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 1px; }
+.eq-pts    { font-size: 1.9rem; line-height: 1; font-weight: 900; }
+#eq-rojo  { background: rgba(100,20,40,.8); border: 2px solid var(--red); }
+#eq-azul  { background: rgba(15,30,100,.8); border: 2px solid var(--blue); }
+#vs-label { font-size: .85rem; font-weight: 900; color: rgba(255,255,255,.4); }
+
+/* ── BARRA PROGRESO ─────────────────────────── */
+#barra-progreso-wrap, #barra-progreso-wrap-vof {
+  height: 4px; background: rgba(255,255,255,.08); width: 100%;
+}
+#barra-progreso, #barra-progreso-vof {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), #ff9d00);
+  transition: width .5s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 8px rgba(255,209,102,.5);
+}
+
+/* ── PANEL DESCRIPCIÓN ──────────────────────── */
+#panel-descripcion {
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  margin: 12px 14px 0;
+  border-radius: 20px; padding: 18px 24px;
+  border-left: 5px solid var(--gold);
+  width: calc(100% - 28px);
+  box-shadow: 0 6px 32px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
+}
+#etiqueta-pista {
+  font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 3px;
+  color: var(--gold); opacity: .7; margin-bottom: 10px;
+}
+#texto-descripcion {
+  font-size: 1.65rem; line-height: 1.6;
+  color: #f0f8ff; font-weight: 600;
+}
+#info-ronda { margin-top: 10px; font-size: .85rem; color: rgba(255,255,255,.45); font-weight: 600; }
+#imagen-equipos { display: none; }
+
+/* ── TIMER ──────────────────────────────────── */
+#timer-wrap {
+  display: none; align-items: center; gap: 12px;
+  margin: 10px 14px 0; width: calc(100% - 28px);
+}
+#timer-wrap.visible { display: flex; }
+#timer-barra-bg {
+  flex: 1; height: 12px;
+  background: rgba(255,255,255,.08);
+  border-radius: 10px; overflow: hidden;
+}
+#timer-barra {
+  height: 100%; background: linear-gradient(90deg, var(--mint), #09d4a8);
+  border-radius: 10px; transition: width .1s linear, background .4s;
+}
+#timer-numero {
+  font-size: 2.2rem; font-weight: 900; min-width: 50px;
+  text-align: right; color: var(--mint); transition: color .4s;
+  font-variant-numeric: tabular-nums;
+}
+@keyframes pulse-red { 0%,100%{opacity:1} 50%{opacity:.6} }
+.timer-urgente { animation: pulse-red .6s infinite; }
+
+#turno-label {
+  display: none; text-align: center;
+  font-size: .8rem; font-weight: 600;
+  color: rgba(255,255,255,.5);
+  margin: 4px 0 0; padding: 0 14px;
+  letter-spacing: .5px;
+}
+
+/* ── GRID TARJETAS ──────────────────────────── */
+#grid-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px; padding: 12px 14px 20px; width: 100%;
+}
+@media (min-width: 768px) {
+  #grid-tarjetas { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+}
+@media (min-width: 1100px) {
+  #grid-tarjetas { grid-template-columns: repeat(5, 1fr); gap: 16px; padding: 14px 20px 24px; }
+}
+@media (min-width: 1400px) {
+  #grid-tarjetas { grid-template-columns: repeat(6, 1fr); gap: 18px; padding: 16px 24px 28px; }
+}
+@media (min-width: 1800px) {
+  #grid-tarjetas { grid-template-columns: repeat(8, 1fr); gap: 18px; }
+}
+
+.tarjeta {
+  background: rgba(8,22,60,.8);
+  backdrop-filter: blur(6px);
+  border-radius: 16px; overflow: hidden; cursor: pointer;
+  border: 2px solid rgba(255,255,255,.08);
+  transition: all .2s cubic-bezier(.34,1.56,.64,1);
+  position: relative; box-shadow: 0 4px 16px rgba(0,0,0,.3);
+}
+.tarjeta:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: var(--gold);
+  box-shadow: 0 12px 32px rgba(0,0,0,.5), 0 0 20px rgba(255,209,102,.2);
+}
+.tarjeta img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; }
+.tarjeta-pie {
+  padding: 8px 10px 10px;
+  background: linear-gradient(rgba(7,16,40,0), rgba(7,16,40,.95));
+}
+.tarjeta-nombre {
+  font-size: .82rem; font-weight: 700; color: #fff;
+  text-align: center; line-height: 1.25;
+}
+.badge {
+  display: block; font-size: .6rem; padding: 3px 0;
+  border-radius: 8px; margin-top: 5px; font-weight: 700;
+  text-align: center; text-transform: uppercase; letter-spacing: 1px;
+}
+.badge-natural    { background: rgba(6,180,90,.25);  color: #5ff0a8; border: 1px solid rgba(6,180,90,.4); }
+.badge-material   { background: rgba(17,138,178,.25); color: #7dd4f0; border: 1px solid rgba(17,138,178,.4); }
+.badge-inmaterial { background: rgba(255,140,50,.25); color: #ffb86c; border: 1px solid rgba(255,140,50,.4); }
+
+/* estados tarjeta */
+.tarjeta.correcta {
+  border-color: var(--mint) !important;
+  box-shadow: 0 0 0 3px rgba(6,214,160,.4), 0 12px 32px rgba(6,214,160,.3) !important;
+  transform: scale(1.06);
+  animation: anim-correcto .5s ease;
+}
+.tarjeta.incorrecta {
+  border-color: var(--red) !important;
+  box-shadow: 0 0 0 3px rgba(239,71,111,.4) !important;
+  animation: anim-incorrecto .45s ease;
+}
+.tarjeta.revelada {
+  border-color: var(--mint) !important;
+  box-shadow: 0 0 0 3px rgba(6,214,160,.5) !important;
+}
+.tarjeta.gana-rojo { border-color: var(--red) !important; box-shadow: 0 0 30px rgba(239,71,111,.5) !important; transform: scale(1.06); }
+.tarjeta.gana-azul { border-color: var(--blue) !important; box-shadow: 0 0 30px rgba(17,138,178,.5) !important; transform: scale(1.06); }
+
+@keyframes anim-correcto   { 0%{transform:scale(1)} 40%{transform:scale(1.13)} 100%{transform:scale(1.06)} }
+@keyframes anim-incorrecto { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 60%{transform:translateX(10px)} }
+
+/* ── OVERLAY ────────────────────────────────── */
+#overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.7); z-index: 50;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+#overlay.visible { display: flex; }
+#caja-overlay {
+  background: linear-gradient(160deg, rgba(12,28,70,.98), rgba(5,14,42,.98));
+  backdrop-filter: blur(20px);
+  border-radius: 24px; padding: 36px 44px;
+  text-align: center; max-width: 460px; width: 90%;
+  border: 2px solid rgba(255,209,102,.4);
+  box-shadow: 0 20px 60px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04);
+  animation: overlay-in .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes overlay-in { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+#overlay-icono     { font-size: 4rem; margin-bottom: 12px; line-height:1; }
+#overlay-titulo    { font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; color: var(--gold); }
+#overlay-subtitulo { font-size: 1rem; color: #b8d4f0; line-height: 1.55; margin-bottom: 24px; }
+.overlay-btns      { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ── PANTALLA FINAL ─────────────────────────── */
+#final {
+  background: linear-gradient(rgba(5,12,35,0.78), rgba(5,12,35,0.78)),
+              url('fondo-2.png') center/cover fixed;
+}
+#final h1 {
+  font-size: 2.4rem; font-weight: 900; color: var(--gold);
+  text-shadow: 0 4px 20px rgba(0,0,0,.8);
+}
+#puntaje-final { font-size: 5rem; font-weight: 900; color: var(--mint); line-height:1; }
+#puntaje-final span { font-size: 1.6rem; color: rgba(255,255,255,.4); }
+#ganador-equipos {
+  font-size: 1.7rem; font-weight: 900;
+  padding: 16px 36px; border-radius: 18px; display: none;
+  letter-spacing: .5px;
+}
+
+/* ── JUEGO ──────────────────────────────────── */
+#pantalla-juego { display: none; flex-direction: column; min-height: 100vh; align-items: stretch; }
+#pantalla-juego.activo {
+  display: flex;
+  background: linear-gradient(rgba(5,12,35,0.76), rgba(5,12,35,0.76)),
+              url('fondo-3.png') center/cover fixed;
+}
+
+/* ── VOF ─────────────────────────────────────── */
+#pantalla-vof { display: none; flex-direction: column; min-height: 100vh; align-items: stretch; }
+#pantalla-vof.activo {
+  display: flex;
+  background: linear-gradient(rgba(5,12,35,0.76), rgba(5,12,35,0.76)),
+              url('fondo-3.png') center/cover fixed;
+}
+
+#vof-imagen-wrap { display: flex; justify-content: center; padding: 14px 14px 0; }
+#vof-imagen {
+  height: 240px; max-width: 320px; width: 100%;
+  object-fit: cover; border-radius: 20px;
+  border: 3px solid rgba(255,209,102,.3);
+  box-shadow: 0 12px 40px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05);
+}
+#vof-afirmacion {
+  background: var(--panel); backdrop-filter: blur(12px);
+  margin: 12px 14px 0; border-radius: 20px; padding: 18px 24px;
+  border-left: 5px solid var(--gold);
+  font-size: 1.6rem; font-weight: 600; color: #f0f8ff;
+  line-height: 1.5; text-align: center;
+  box-shadow: 0 6px 32px rgba(0,0,0,.5);
+}
+#vof-etiqueta {
+  font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 3px;
+  color: var(--gold); opacity: .7; margin-bottom: 10px;
+}
+#vof-botones { display: flex; flex-direction: column; gap: 12px; padding: 14px; }
+.vof-equipo-row { display: flex; align-items: center; gap: 10px; }
+.vof-eq-label {
+  font-size: .75rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1px; min-width: 64px; text-align: right;
+}
+.vof-btn {
+  flex: 1; padding: 16px 10px; border: none; border-radius: 14px;
+  font-size: 1.1rem; font-weight: 900; font-family: 'Poppins', sans-serif;
+  cursor: pointer; transition: all .15s; letter-spacing: .5px;
+}
+.vof-btn:hover:not(:disabled) { transform: scale(1.04); filter: brightness(1.1); }
+.vof-btn:disabled { opacity: .3; cursor: not-allowed; transform: none; }
+.vof-v-rojo { background: linear-gradient(135deg,#e84545,#b01e1e); color: #fff; box-shadow: 0 4px 16px rgba(200,30,30,.3); }
+.vof-f-rojo { background: linear-gradient(135deg,#9b1c1c,#6d0e0e); color: #fff; }
+.vof-v-azul { background: linear-gradient(135deg,#2a7fd4,#1356a0); color: #fff; box-shadow: 0 4px 16px rgba(30,80,200,.3); }
+.vof-f-azul { background: linear-gradient(135deg,#103d80,#082660); color: #fff; }
+.vof-btn.acierto { outline: 3px solid var(--mint); background: linear-gradient(135deg,#0a4d35,#063325) !important; box-shadow: 0 0 20px rgba(6,214,160,.4) !important; }
+.vof-btn.error    { outline: 3px solid var(--red);  background: linear-gradient(135deg,#4d0a1a,#330613) !important; }
+
+/* ══════════════════════════════════════════════
+   MEMORICE
+══════════════════════════════════════════════ */
+#pantalla-memorice { display: none; flex-direction: column; min-height: 100vh; align-items: stretch; }
+#pantalla-memorice.activo {
+  display: flex;
+  background: linear-gradient(rgba(5,12,35,0.76), rgba(5,12,35,0.76)),
+              url('fondo-1.png') center/cover fixed;
+}
+
+/* cabecera memorice */
+#cab-memorice {
+  background: rgba(5,12,35,.95); backdrop-filter: blur(12px);
+  padding: 10px 20px; display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  border-bottom: 2px solid rgba(255,209,102,.4);
+  box-shadow: 0 2px 20px rgba(0,0,0,.4);
+}
+#cab-memorice h2 { font-size: 1rem; font-weight: 800; color: var(--gold); }
+
+.mem-stat {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.08);
+  padding: 5px 14px; border-radius: 50px;
+  font-size: .88rem; font-weight: 700;
+}
+.mem-stat .mem-val { font-size: 1.2rem; font-weight: 900; color: var(--gold); }
+#mem-pares-val { color: var(--mint); }
+#mem-tiempo-val { color: #b8d4f0; }
+
+/* grid memorice */
+#grid-memorice {
+  display: grid; gap: 12px;
+  padding: 14px 16px 24px; flex: 1;
+  align-content: start;
+}
+
+/* cartas memorice */
+.mem-carta {
+  perspective: 1000px;
+  cursor: pointer;
+  aspect-ratio: 3/4;
+}
+.mem-carta-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform .55s cubic-bezier(.4,0,.2,1);
+  border-radius: 16px;
+}
+.mem-carta.volteada .mem-carta-inner { transform: rotateY(180deg); }
+.mem-carta.emparejada .mem-carta-inner { transform: rotateY(180deg); }
+
+.mem-cara, .mem-contenido {
+  position: absolute; inset: 0;
+  border-radius: 16px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+/* cara (reverso decorativo) */
+.mem-cara {
+  background: linear-gradient(160deg, #0e2560, #060f30);
+  border: 2px solid rgba(255,209,102,.3);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+  transition: box-shadow .2s, border-color .2s;
+}
+.mem-carta:hover:not(.volteada):not(.emparejada) .mem-cara {
+  border-color: var(--gold);
+  box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 24px rgba(255,209,102,.25);
+}
+.mem-cara::before {
+  content: '';
+  display: block;
+  width: 58%;
+  padding-top: 58%;
+  background: url('insignia.png') center/contain no-repeat;
+  filter: drop-shadow(0 2px 10px rgba(0,0,0,.6));
+  opacity: .92;
+}
+.mem-cara::after {
+  content: 'PATRIMONIAL CALIFORNIA';
+  font-size: .48rem; font-weight: 800;
+  letter-spacing: 2.5px; color: rgba(255,209,102,.5);
+  text-transform: uppercase;
+}
+
+/* contenido (cara visible) */
+.mem-contenido {
+  transform: rotateY(180deg);
+  border: 2px solid rgba(255,255,255,.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+}
+
+/* carta tipo imagen */
+.mem-contenido.tipo-imagen { background: #0a1a40; }
+.mem-contenido.tipo-imagen img {
+  width: 100%; height: 70%; object-fit: cover; display: block;
+}
+.mem-img-pie {
+  padding: 8px 10px;
+  background: linear-gradient(rgba(5,12,35,0), rgba(5,12,35,1));
+  position: absolute; bottom: 0; width: 100%;
+}
+.mem-img-nombre {
+  font-size: .75rem; font-weight: 800; color: #fff;
+  text-align: center; line-height: 1.2;
+}
+.mem-img-badge {
+  font-size: .55rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; text-align: center; margin-top: 4px;
+  padding: 2px 6px; border-radius: 6px; display: block;
+}
+
+/* carta tipo descripción */
+.mem-contenido.tipo-desc {
+  background: linear-gradient(160deg, #0d2657, #071e4a);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 12px 10px; gap: 8px;
+  border-color: rgba(255,209,102,.3);
+}
+.mem-desc-etiqueta {
+  font-size: .55rem; font-weight: 700; letter-spacing: 2px;
+  color: var(--gold); text-transform: uppercase; opacity: .8;
+}
+.mem-desc-texto {
+  font-size: .8rem; font-weight: 600; color: #e8f4ff;
+  line-height: 1.45; text-align: center;
+}
+
+/* estado emparejada */
+.mem-carta.emparejada .mem-contenido {
+  border-color: var(--mint);
+  box-shadow: 0 0 0 3px rgba(6,214,160,.35), 0 8px 24px rgba(6,214,160,.2);
+  animation: mem-pop .4s cubic-bezier(.34,1.56,.64,1);
+}
+.mem-carta.error-flip .mem-carta-inner {
+  animation: mem-error .5s ease;
+}
+@keyframes mem-pop   { 0%{transform:rotateY(180deg) scale(1)} 50%{transform:rotateY(180deg) scale(1.08)} 100%{transform:rotateY(180deg) scale(1)} }
+@keyframes mem-error { 0%,100%{transform:rotateY(180deg)} 25%{transform:rotateY(180deg) translateX(-6px)} 75%{transform:rotateY(180deg) translateX(6px)} }
+
+/* pantalla final memorice */
+#mem-final-stats {
+  display: flex; gap: 20px; justify-content: center;
+  flex-wrap: wrap; margin-top: 4px;
+}
+.mem-final-chip {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px; padding: 14px 26px; text-align: center;
+}
+.mem-final-chip .chip-val { font-size: 2.4rem; font-weight: 900; color: var(--gold); line-height:1; }
+.mem-final-chip .chip-label { font-size: .7rem; font-weight: 700; color: rgba(255,255,255,.45); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ INICIO ══════════ -->
+<div id="inicio" class="pantalla activa">
+  <div class="inicio-logo"><img src="insignia.png" alt="Escuela Patrimonial California Tomé"></div>
+  <h1>Patrimonio Tomecino</h1>
+  <p class="subtitulo">Escuela Patrimonial California · Tomé</p>
+
+  <div class="modos-wrap">
+    <div class="modo-card seleccionado" onclick="elegirModo('normal', this)">
+      <div class="modo-icono">📖</div>
+      <div class="modo-nombre">Modo Clásico</div>
+      <div class="modo-desc">Un estudiante lee la descripción en voz alta. Los demás hacen clic en la imagen correcta.</div>
+    </div>
+    <div class="modo-card" onclick="elegirModo('equipos', this)">
+      <div class="modo-icono">⚡</div>
+      <div class="modo-nombre">Modo Equipos</div>
+      <div class="modo-desc">¡Rojo vs Azul! Aparece una adivinanza y ambos equipos compiten para hacer clic en la imagen correcta antes que se acabe el tiempo.</div>
+    </div>
+    <div class="modo-card" onclick="elegirModo('vof', this)">
+      <div class="modo-icono">🤔</div>
+      <div class="modo-nombre">¿Verdadero o Falso?</div>
+      <div class="modo-desc">Se muestra una imagen con una afirmación. ¿Es verdadera o falsa? Ambos equipos votan al mismo tiempo — ¡el más rápido en acertar anota!</div>
+    </div>
+    <div class="modo-card" onclick="elegirModo('memorice', this)">
+      <div class="modo-icono">🃏</div>
+      <div class="modo-nombre">Memorice</div>
+      <div class="modo-desc">Voltea las tarjetas y empareja cada imagen con su descripción. ¡Menos intentos y menor tiempo = mejor puntaje!</div>
+    </div>
+  </div>
+
+  <div id="config-memorice" style="display:none;">
+    <p class="config-label">¿Cuántos pares?</p>
+    <div class="opciones-ronda">
+      <button class="btn-ronda activo" onclick="seleccionarParesMem(6,this)">6 pares</button>
+      <button class="btn-ronda" onclick="seleccionarParesMem(8,this)">8 pares</button>
+      <button class="btn-ronda" onclick="seleccionarParesMem(12,this)">12 pares</button>
+      <button class="btn-ronda" onclick="seleccionarParesMem(16,this)">16 pares</button>
+    </div>
+    <p style="font-size:.78rem; color:rgba(255,255,255,.35); margin-top:10px;">Cada par = 1 imagen + 1 descripción</p>
+  </div>
+
+  <div id="config-normal">
+    <p class="config-label">¿Cuántas tarjetas?</p>
+    <div class="opciones-ronda">
+      <button class="btn-ronda activo" onclick="seleccionarRondas(8,this)">8</button>
+      <button class="btn-ronda" onclick="seleccionarRondas(16,this)">16</button>
+      <button class="btn-ronda" onclick="seleccionarRondas(24,this)">24</button>
+      <button class="btn-ronda" onclick="seleccionarRondas(32,this)">32 (todas)</button>
+    </div>
+  </div>
+
+  <div id="config-vof" style="display:none;">
+    <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-bottom:16px;">
+      <div class="equipo-input-box rojo">
+        <div class="eq-tag">Equipo Rojo</div>
+        <input id="vof-nombre-rojo" type="text" value="Rojo" maxlength="12">
+      </div>
+      <div style="font-size:1.3rem; display:flex; align-items:center; color:rgba(255,255,255,.3); font-weight:900;">VS</div>
+      <div class="equipo-input-box azul">
+        <div class="eq-tag">Equipo Azul</div>
+        <input id="vof-nombre-azul" type="text" value="Azul" maxlength="12">
+      </div>
+    </div>
+    <p class="config-label">¿Cuántas rondas?</p>
+    <div class="opciones-ronda">
+      <button class="btn-ronda activo" onclick="seleccionarRondas(8,this)">8</button>
+      <button class="btn-ronda" onclick="seleccionarRondas(16,this)">16</button>
+      <button class="btn-ronda" onclick="seleccionarRondas(24,this)">24</button>
+      <button class="btn-ronda" onclick="seleccionarRondas(32,this)">32 (todas)</button>
+    </div>
+  </div>
+
+  <div id="config-equipos" style="display:none;">
+    <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-bottom:16px;">
+      <div class="equipo-input-box rojo">
+        <div class="eq-tag">Equipo Rojo</div>
+        <input id="nombre-rojo" type="text" value="Rojo" maxlength="12">
+      </div>
+      <div style="font-size:1.3rem; display:flex; align-items:center; color:rgba(255,255,255,.3); font-weight:900;">VS</div>
+      <div class="equipo-input-box azul">
+        <div class="eq-tag">Equipo Azul</div>
+        <input id="nombre-azul" type="text" value="Azul" maxlength="12">
+      </div>
+    </div>
+    <p class="config-label">¿Cuántas rondas?</p>
+    <div class="opciones-ronda">
+      <button class="btn-ronda activo" onclick="seleccionarRondas(8,this)">8</button>
+      <button class="btn-ronda" onclick="seleccionarRondas(16,this)">16</button>
+      <button class="btn-ronda" onclick="seleccionarRondas(24,this)">24</button>
+      <button class="btn-ronda" onclick="seleccionarRondas(32,this)">32 (todas)</button>
+    </div>
+  </div>
+
+  <button class="btn btn-amarillo" style="font-size:1.1rem; padding:15px 38px;" onclick="iniciarJuego()">
+    ▶ Comenzar juego
+  </button>
+</div>
+
+<!-- ══════════ PANTALLA JUEGO ══════════ -->
+<div id="pantalla-juego">
+  <div id="cabecera">
+    <h2>🏛️ Patrimonio Tomecino</h2>
+    <div id="marcador-normal">
+      <div class="score-chip correctas">✅ <span class="score-num" id="cont-correctas">0</span></div>
+      <div class="score-chip incorrectas">❌ <span class="score-num" id="cont-incorrectas">0</span></div>
+    </div>
+    <div id="marcador-equipos" style="display:none;">
+      <div class="equipo-score" id="eq-rojo">
+        <div class="eq-nombre" id="label-rojo">Rojo</div>
+        <div class="eq-pts" id="pts-rojo">0</div>
+      </div>
+      <div id="vs-label">VS</div>
+      <div class="equipo-score" id="eq-azul">
+        <div class="eq-nombre" id="label-azul">Azul</div>
+        <div class="eq-pts" id="pts-azul">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="barra-progreso-wrap"><div id="barra-progreso" style="width:0%"></div></div>
+
+  <div id="panel-descripcion">
+    <div id="etiqueta-pista">📖 Lee esta descripción en voz alta:</div>
+    <div id="texto-descripcion"></div>
+    <img id="imagen-equipos" src="" alt="">
+    <div id="info-ronda"></div>
+  </div>
+
+  <!-- Timer (solo modo equipos) -->
+  <div id="timer-wrap">
+    <span style="font-size:.8rem; color:#8ab4d4; white-space:nowrap;">⏱ Tiempo</span>
+    <div id="timer-barra-bg"><div id="timer-barra" style="width:100%"></div></div>
+    <div id="timer-numero">20</div>
+  </div>
+
+  <div id="turno-label"></div>
+
+  <div id="grid-tarjetas"></div>
+</div>
+
+<!-- ══════════ PANTALLA VOF ══════════ -->
+<div id="pantalla-vof">
+  <div id="cabecera-vof" style="background:#0f1f3d; padding:10px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; border-bottom:3px solid #ffd166;">
+    <h2 style="font-size:1.1rem; color:#ffd166;">🤔 ¿Verdadero o Falso?</h2>
+    <div style="display:flex; gap:14px; align-items:center;">
+      <div class="equipo-score" id="vof-eq-rojo" style="background:#6b1a2a; border:2px solid #ef476f; display:flex; flex-direction:column; align-items:center; padding:6px 18px; border-radius:12px; font-weight:800;">
+        <div id="vof-label-rojo" style="font-size:.75rem; text-transform:uppercase; letter-spacing:1px; color:#ef476f;">Rojo</div>
+        <div id="vof-pts-rojo" style="font-size:1.8rem; line-height:1;">0</div>
+      </div>
+      <div style="font-size:1rem; font-weight:800; color:#8ab4d4;">VS</div>
+      <div class="equipo-score" id="vof-eq-azul" style="background:#1a2a6b; border:2px solid #118ab2; display:flex; flex-direction:column; align-items:center; padding:6px 18px; border-radius:12px; font-weight:800;">
+        <div id="vof-label-azul" style="font-size:.75rem; text-transform:uppercase; letter-spacing:1px; color:#118ab2;">Azul</div>
+        <div id="vof-pts-azul" style="font-size:1.8rem; line-height:1;">0</div>
+      </div>
+    </div>
+    <div style="font-size:.85rem; color:#8ab4d4;" id="vof-info-ronda">Ronda 1</div>
+  </div>
+
+  <div id="barra-progreso-wrap-vof" style="height:5px; background:#0f1f3d; width:100%;">
+    <div id="barra-progreso-vof" style="height:100%; background:#ffd166; transition:width .4s ease; width:0%;"></div>
+  </div>
+
+  <!-- Timer -->
+  <div style="display:flex; align-items:center; gap:14px; margin:12px 16px 0; width:calc(100% - 32px);">
+    <span style="font-size:.8rem; color:#8ab4d4; white-space:nowrap;">⏱ Tiempo</span>
+    <div style="flex:1; height:14px; background:#0f1f3d; border-radius:10px; overflow:hidden;">
+      <div id="vof-timer-barra" style="height:100%; background:#06d6a0; border-radius:10px; transition:width .1s linear; width:100%;"></div>
+    </div>
+    <div id="vof-timer-num" style="font-size:2rem; font-weight:900; min-width:44px; text-align:right; color:#06d6a0;">15</div>
+  </div>
+
+  <!-- Imagen -->
+  <div id="vof-imagen-wrap">
+    <img id="vof-imagen" src="" alt="">
+  </div>
+
+  <!-- Afirmación -->
+  <div id="vof-afirmacion">
+    <div id="vof-etiqueta">¿Es verdadera o falsa esta afirmación?</div>
+    <div id="vof-texto"></div>
+  </div>
+
+  <!-- Botones equipos -->
+  <div id="vof-botones">
+    <div class="vof-equipo-row">
+      <div class="vof-eq-label" style="color:#ef476f;" id="vof-rlabel-rojo">ROJO</div>
+      <button class="vof-btn vof-v-rojo" id="vof-r-v" onclick="votarVoF('rojo','v')">✅ VERDADERO</button>
+      <button class="vof-btn vof-f-rojo" id="vof-r-f" onclick="votarVoF('rojo','f')">❌ FALSO</button>
+    </div>
+    <div class="vof-equipo-row">
+      <div class="vof-eq-label" style="color:#118ab2;" id="vof-rlabel-azul">AZUL</div>
+      <button class="vof-btn vof-v-azul" id="vof-a-v" onclick="votarVoF('azul','v')">✅ VERDADERO</button>
+      <button class="vof-btn vof-f-azul" id="vof-a-f" onclick="votarVoF('azul','f')">❌ FALSO</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MEMORICE ══════════ -->
+<div id="pantalla-memorice">
+  <div id="cab-memorice">
+    <h2>🃏 Memorice Patrimonial</h2>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <div class="mem-stat">🔄 Intentos: <span class="mem-val" id="mem-intentos-val">0</span></div>
+      <div class="mem-stat">✅ Pares: <span class="mem-val" id="mem-pares-val">0</span></div>
+      <div class="mem-stat">⏱ <span class="mem-val" id="mem-tiempo-val">0:00</span></div>
+    </div>
+    <div style="font-size:.82rem; color:rgba(255,255,255,.4); font-weight:600;" id="mem-info-pares"></div>
+  </div>
+  <div id="barra-progreso-wrap-mem" style="height:4px; background:rgba(255,255,255,.08); width:100%;">
+    <div id="barra-progreso-mem" style="height:100%; background:linear-gradient(90deg,var(--gold),#ff9d00); transition:width .5s; width:0%; box-shadow:0 0 8px rgba(255,209,102,.5);"></div>
+  </div>
+  <div id="grid-memorice"></div>
+</div>
+
+<!-- ══════════ OVERLAY ══════════ -->
+<div id="overlay">
+  <div id="caja-overlay">
+    <div id="overlay-icono"></div>
+    <div id="overlay-titulo"></div>
+    <div id="overlay-subtitulo"></div>
+    <div class="overlay-btns">
+      <button class="btn btn-verde" onclick="siguientePregunta()">Siguiente →</button>
+      <button class="btn btn-gris" onclick="cerrarOverlay()">Ver tablero</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FINAL ══════════ -->
+<div id="final" class="pantalla">
+  <div style="font-size:3rem;">🎉</div>
+  <h1>¡Juego terminado!</h1>
+  <div id="puntaje-final" style="display:none;"></div>
+  <div id="ganador-equipos"></div>
+  <p id="mensaje-final" style="color:#cce4ff; font-size:1rem; max-width:400px; line-height:1.6;"></p>
+  <div id="marcador-final-equipos" style="display:none; gap:20px; justify-content:center; flex-wrap:wrap;">
+    <div style="background:#6b1a2a; border:2px solid #ef476f; border-radius:14px; padding:14px 28px; text-align:center;">
+      <div id="final-label-rojo" style="font-size:.8rem; color:#ef476f; font-weight:700;"></div>
+      <div id="final-pts-rojo" style="font-size:2.5rem; font-weight:900;"></div>
+    </div>
+    <div style="background:#1a2a6b; border:2px solid #118ab2; border-radius:14px; padding:14px 28px; text-align:center;">
+      <div id="final-label-azul" style="font-size:.8rem; color:#118ab2; font-weight:700;"></div>
+      <div id="final-pts-azul" style="font-size:2.5rem; font-weight:900;"></div>
+    </div>
+  </div>
+  <button class="btn btn-amarillo" onclick="reiniciar()">🔄 Jugar de nuevo</button>
+</div>
+
+<script>
+// ── Datos ──────────────────────────────────────────────────────────
+const TARJETAS = [
+  { id:1,  nombre:"LOS MORROS COLIUMO",          cat:"natural",    imagen:"imagenes/image1.png",
+    desc:"Playa extensa de arenas finas, con un cerro que se adentra en el mar y una caleta de pescadores artesanales.",
+    pista:"Soy una playa con un cerro que se mete al mar y tengo una caleta de pescadores. ¿Quién soy?",
+    falso:"Soy una playa de aguas termales con un faro en lo alto del cerro que guía a los navegantes." },
+  { id:2,  nombre:"CORMORANES",                  cat:"natural",    imagen:"imagenes/image2.png",
+    desc:"Habitan en las costas de Tomé. Se alimentan de peces y suelen posarse en rocas y muelles con sus alas abiertas para secarlas al sol.",
+    pista:"Somos aves marinas que secamos nuestras alas abiertas en las rocas de Tomé. ¿Quiénes somos?",
+    falso:"Somos aves marinas que construimos grandes nidos en los árboles costeros y nos alimentamos de mariscos." },
+  { id:3,  nombre:"COPIHUE",                     cat:"natural",    imagen:"imagenes/image3.png",
+    desc:"Flor nacional de Chile que crece en los bosques húmedos de Tomé. Su color rojo intenso y forma de campana simbolizan la belleza y fuerza de la naturaleza chilena.",
+    pista:"Soy una flor roja en forma de campana, la flor nacional de Chile. ¿Quién soy?",
+    falso:"Soy una flor morada en forma de estrella que crece en los desiertos del norte de Chile." },
+  { id:4,  nombre:"PLAYA TRES PINOS",            cat:"natural",    imagen:"imagenes/image4.png",
+    desc:"Encantadora playa de Tomé rodeada de vegetación y formaciones rocosas. Es un lugar tranquilo, ideal para disfrutar la naturaleza y las vistas del litoral tomecino.",
+    pista:"Soy una playa tranquila rodeada de rocas y vegetación en el litoral tomecino. ¿Quién soy?",
+    falso:"Soy una playa urbana con paseo peatonal, quioscos y espigón de pesca en el centro de Tomé." },
+  { id:5,  nombre:"CECILIA PANTOJA",             cat:"inmaterial", imagen:"imagenes/image5.png",
+    desc:"Atleta tomecina que representó a Chile en torneos internacionales, ganando medallas y récords en salto largo.",
+    pista:"Fui una atleta tomecina que saltó lejos y ganó medallas para Chile. ¿Quién soy?",
+    falso:"Fui una nadadora tomecina que ganó el oro en los Juegos Panamericanos de natación en 1991." },
+  { id:6,  nombre:"JAIBERAS",                    cat:"inmaterial", imagen:"imagenes/image6.png",
+    desc:"Mujeres de las caletas de Tomé que mantienen viva la tradición de recolectar, cocer y vender jaibas.",
+    pista:"Somos mujeres de las caletas que cocemos y vendemos jaibas. ¿Quiénes somos?",
+    falso:"Somos hombres de las caletas que salen en bote a pescar jaibas en alta mar durante la noche." },
+  { id:7,  nombre:"ALGUERAS",                    cat:"inmaterial", imagen:"imagenes/image7.png",
+    desc:"Recolectan y secan algas marinas, manteniendo un oficio tradicional heredado de sus familias.",
+    pista:"Recogemos algas del mar y las secamos al sol. Es un oficio heredado de familia en familia. ¿Quiénes somos?",
+    falso:"Cultivamos ostras y mejillones en balsas flotantes, usando técnicas modernas de acuicultura." },
+  { id:8,  nombre:"LA FONTANA DE TRITONES",      cat:"material",   imagen:"imagenes/image8.png",
+    desc:"Emblemática pileta ubicada en la Plaza de Armas de Tomé. Sus figuras de tritones y su elegante diseño la convierten en un símbolo patrimonial del centro histórico.",
+    pista:"Soy una pileta con figuras mitológicas en la Plaza de Armas de Tomé. ¿Quién soy?",
+    falso:"Soy un mural pintado en la fachada del Municipio de Tomé con imágenes del mar y los pescadores." },
+  { id:9,  nombre:"IGLESIA NTRA. SRA. DE LOS RAYOS", cat:"material", imagen:"imagenes/image18.png",
+    desc:"Iglesia Católica construida por iniciativa de Carlos Mahns en 1926 en el cerro La Pampa de Tomé.",
+    pista:"Fui construida en 1926 por iniciativa de Carlos Mahns en el cerro La Pampa. ¿Quién soy?",
+    falso:"Fui construida en 1880 por la comunidad alemana como capilla para los trabajadores del puerto." },
+  { id:10, nombre:"FIESTA SAN PEDRO",            cat:"inmaterial", imagen:"imagenes/image19.png",
+    desc:"Tradicional celebración de los pescadores de Tomé en honor a su santo patrono. Con embarcaciones adornadas, música y fe, agradecen al mar.",
+    pista:"Soy la fiesta en que los pescadores adornan sus botes y salen al mar a agradecer. ¿Quién soy?",
+    falso:"Soy una celebración minera donde los trabajadores desfilan con sus herramientas en honor a su patrono." },
+  { id:11, nombre:"VENDEDORA DE PAN AMASADO",    cat:"inmaterial", imagen:"imagenes/image20.png",
+    desc:"Figura tradicional de Tomé que recorre las calles ofreciendo pan recién horneado.",
+    pista:"Recorro las calles de Tomé con pan caliente recién horneado. ¿Quién soy?",
+    falso:"Recorro las calles de Tomé en una camioneta vendiendo marraquetas y hallullas de panadería industrial." },
+  { id:12, nombre:"PLESIOSAURO",                 cat:"natural",    imagen:"imagenes/image21.png",
+    desc:"Fósil marino prehistórico hallado en las costas de Cocholgüe, testimonio de la vida que habitó la zona hace millones de años.",
+    pista:"Soy un fósil prehistórico encontrado en Cocholgüe. Viví hace millones de años. ¿Quién soy?",
+    falso:"Soy el esqueleto de una ballena azul encontrado en la playa de Dichato hace más de 200 años." },
+  { id:13, nombre:"PESCADORES ARTESANALES",      cat:"inmaterial", imagen:"imagenes/image22.png",
+    desc:"Hombres y mujeres del mar que mantienen viva la tradición pesquera de Tomé con conocimiento ancestral.",
+    pista:"Salimos al mar con nuestras embarcaciones y sostenemos las caletas de Tomé. ¿Quiénes somos?",
+    falso:"Trabajamos en grandes barcos industriales extrayendo salmón para exportarlo a mercados internacionales." },
+  { id:14, nombre:"FÁBRICA TEXTIL OVEJA TOMÉ",   cat:"material",   imagen:"imagenes/image23.png",
+    desc:"Histórico complejo industrial fundado en 1865 que marcó la identidad social y económica de Tomé. Sus telares y obreros dieron vida a una de las fábricas textiles más importantes de Chile.",
+    pista:"Fui fundada en 1865 y mis telares tejieron la historia obrera de Tomé. ¿Quién soy?",
+    falso:"Fui fundada en 1920 y mis hornos fabricaron la cerámica más fina del sur de Chile durante décadas." },
+  { id:15, nombre:"MOLINO CALIFORNIA",           cat:"material",   imagen:"imagenes/image24.png",
+    desc:"Antiguo molino harinero que impulsó el desarrollo del barrio California en Tomé.",
+    pista:"Fui un molino harinero que dio origen al barrio California en Tomé. ¿Quién soy?",
+    falso:"Fui una central hidroeléctrica construida a orillas del río Tomé para abastecer de luz al pueblo." },
+  { id:16, nombre:"ÁRBOL QUEULE",                cat:"natural",    imagen:"imagenes/image25.png",
+    desc:"Árbol nativo en peligro de extinción que crece en los bosques costeros de Tomé. Su madera resistente y su valor ecológico lo convierten en símbolo del patrimonio natural.",
+    pista:"Soy un árbol nativo en peligro de extinción que crece en los bosques costeros de Tomé. ¿Quién soy?",
+    falso:"Soy un árbol introducido desde Europa que se planta en las plazas de Tomé por su sombra y flores." },
+  { id:17, nombre:"IGLESIA CRISTO REY",          cat:"material",   imagen:"imagenes/image28.png",
+    desc:"Templo construido en 1943 para brindar un espacio de oración y comunidad a los trabajadores de la zona industrial de Tomé.",
+    pista:"Fui construida en 1943 para dar un lugar de oración a los trabajadores de la zona industrial. ¿Quién soy?",
+    falso:"Fui construida en 1870 por los jesuitas como misión evangelizadora en los cerros de Tomé." },
+  { id:18, nombre:"LOBOS MARINOS",               cat:"natural",    imagen:"imagenes/image29.png",
+    desc:"Habitan en las costas de Tomé. Se les puede ver posados en rocas y orillas, siendo una presencia característica del litoral.",
+    pista:"Nos tumbamos en las rocas del litoral tomecino y somos mamíferos marinos. ¿Quiénes somos?",
+    falso:"Somos peces de gran tamaño que viven en cuevas submarinas y salen a la superficie en invierno." },
+  { id:19, nombre:"TÚNEL PUNTA DE PARRA",        cat:"material",   imagen:"imagenes/image30.png",
+    desc:"Construido a inicios del siglo XX para el paso del ferrocarril, conecta Tomé con Concepción.",
+    pista:"El tren me atravesó para conectar Tomé con Concepción. Hoy soy patrimonio. ¿Quién soy?",
+    falso:"Fui construido para que los camiones trasladaran carbón desde las minas hasta el puerto de Tomé." },
+  { id:20, nombre:"ALFONSO ALCALDE",             cat:"inmaterial", imagen:"imagenes/image31.png",
+    desc:"Escritor y poeta avecindado en Tomé, reconocido por su profundo amor al mar y a la vida obrera.",
+    pista:"Fui poeta y escritor enamorado del mar y la vida obrera de Tomé. ¿Quién soy?",
+    falso:"Fui alcalde de Tomé durante tres períodos y construí el paseo costero y la biblioteca municipal." },
+  { id:21, nombre:"LISA PETER TEUBNER",          cat:"inmaterial", imagen:"imagenes/image32.png",
+    desc:"Atleta tomecina de salto largo, medalla de oro en Sudamericanos 1954 y récord de 5,75 metros. Hija Ilustre de Tomé.",
+    pista:"Fui atleta de salto largo y gané medallas internacionales en los años 50. Soy Hija Ilustre de Tomé. ¿Quién soy?",
+    falso:"Fui una nadadora tomecina que ganó medallas en los Juegos Sudamericanos de 1960 y fue la primera mujer de Tomé en representar a Chile en natación." },
+  { id:22, nombre:"TRILLA",                      cat:"inmaterial", imagen:"imagenes/image33.png",
+    desc:"Antigua celebración campesina donde la comunidad se reúne para separar el grano de la paja, con música, comida y baile.",
+    pista:"Soy una celebración campesina donde se separa el grano de la paja con música y baile. ¿Quién soy?",
+    falso:"Soy una competencia de pesca donde las familias miden quién trae más peces al final del día." },
+  { id:23, nombre:"RAFAEL AMPUERO",              cat:"inmaterial", imagen:"imagenes/image34.jpeg",
+    desc:"Reconocido escritor vinculado a Tomé, cuya obra literaria ha dejado huella en la cultura y el patrimonio de la comuna.",
+    pista:"Soy un escritor chileno vinculado a Tomé cuyas novelas dejaron huella en la cultura local. ¿Quién soy?",
+    falso:"Fui un compositor de música folclórica que recopiló los cantos de los pescadores del litoral chileno." },
+  { id:24, nombre:"DEPORTIVO Y CINE BELLAVISTA", cat:"material",   imagen:"imagenes/image35.png",
+    desc:"Histórico edificio de Tomé que unió deporte, cine y comunidad. Símbolo del patrimonio industrial y social del barrio Bellavista.",
+    pista:"Fui el lugar donde Tomé vio películas, hizo deporte y se reunió como comunidad. ¿Quién soy?",
+    falso:"Fui un hotel y casino construido en 1950 para recibir a los turistas del balneario de Tomé." },
+  { id:25, nombre:"ESC. PATRIMONIAL CALIFORNIA", cat:"material",   imagen:"imagenes/image36.png",
+    desc:"Fundada en 1908, es un símbolo educativo e histórico de Tomé que une aprendizaje e identidad local.",
+    pista:"Fui fundada en 1908 y soy un símbolo de educación e historia en Tomé. ¿Quién soy?",
+    falso:"Fui fundada en 1960 como la primera escuela técnica para formar mecánicos navales en la región." },
+  { id:26, nombre:"CERAMISTA",                   cat:"inmaterial", imagen:"imagenes/image37.png",
+    desc:"Artesano que trabaja el barro y la arcilla, manteniendo viva la tradición alfarera de la zona.",
+    pista:"Trabajo el barro y la arcilla con mis manos, manteniendo viva una tradición ancestral. ¿Quién soy?",
+    falso:"Tejo lanas de oveja en telares de madera siguiendo una tradición mapuche del interior de la región." },
+  { id:27, nombre:"FARO COCHOLGUE",              cat:"material",   imagen:"imagenes/image38.png",
+    desc:"Emblemático faro ubicado en la costa de Cocholgüe, guía a los navegantes y es símbolo del patrimonio marítimo de Tomé.",
+    pista:"Mi luz guía a los barcos en la costa de Cocholgüe. Soy símbolo marítimo de Tomé. ¿Quién soy?",
+    falso:"Soy una torre de radio construida en los años 80 para comunicar a los pescadores con tierra firme." },
+  { id:28, nombre:"FÁBRICA FIAP",                cat:"material",   imagen:"imagenes/image39.png",
+    desc:"Industria textil fundada en el siglo XX que continuó la tradición obrera de la comuna.",
+    pista:"Fui una industria textil del siglo XX que continuó la tradición obrera de Tomé. ¿Quién soy?",
+    falso:"Fui una fábrica de conservas de mariscos fundada en 1865 que exportaba a Europa y Norteamérica." },
+  { id:29, nombre:"CEMENTERIO UNO",              cat:"material",   imagen:"imagenes/image40.png",
+    desc:"Inaugurado a fines del siglo XIX, es uno de los recintos más antiguos de la comuna. Su arquitectura y esculturas reflejan la historia de generaciones tomecinas.",
+    pista:"Soy el recinto más antiguo de Tomé, inaugurado en el siglo XIX. Guardo la memoria de generaciones. ¿Quién soy?",
+    falso:"Soy un parque arborizado fundado en 1970 con especies nativas donadas por vecinos de la comunidad." },
+  { id:30, nombre:"MANICERO",                    cat:"inmaterial", imagen:"imagenes/image41.png",
+    desc:"Personaje tradicional de Tomé que recorre las calles en su triciclo con forma de tren, vendiendo maní caliente.",
+    pista:"Recorro las calles de Tomé en un triciclo-tren vendiendo maní caliente. ¿Quién soy?",
+    falso:"Recorro las playas de Tomé en verano con una carretilla azul vendiendo helados y bebidas frías." },
+  { id:31, nombre:"PESCADA SECA",                cat:"inmaterial", imagen:"imagenes/image42.png",
+    desc:"Tradición costera de Tomé donde los pescadores y sus familias secan la pescada al sol sobre tablas o cuerdas.",
+    pista:"Soy una tradición costera: los pescadores me tienden al sol sobre tablas para conservarme. ¿Qué soy?",
+    falso:"Soy una técnica de ahumado de salmón usada en las salmoneras del lago Laja en la región del Biobío." },
+  { id:32, nombre:"CHINCHINEROS",                cat:"inmaterial", imagen:"imagenes/image43.png",
+    desc:"Artistas populares que recorren las calles de Tomé haciendo música con su bombo y platillos.",
+    pista:"Animamos las calles de Tomé con nuestro bombo y platillos. ¿Quiénes somos?",
+    falso:"Tocamos guitarra y cajón peruano en las peñas folclóricas del centro cultural de Tomé los fines de semana." },
+];
+
+const BADGE = {
+  natural:    { label:"Cultural Natural",    cls:"badge-natural" },
+  material:   { label:"Cultural Material",   cls:"badge-material" },
+  inmaterial: { label:"Cultural Inmaterial", cls:"badge-inmaterial" },
+};
+
+// ── Estado global ──────────────────────────────────────────
+let modo           = 'normal';
+let totalRondas    = 8;
+let rondaActual    = 0;
+let secuencia      = [];
+let tarjetaCorrecta= null;
+let respondido     = false;
+
+// Estado equipos
+let ptsRojo = 0, ptsAzul = 0;
+let timerInterval = null;
+let tiempoRestante = 0;
+const TIEMPO_MAX = 20;
+
+// ── Selección de modo ──────────────────────────────────────
+function elegirModo(m, el) {
+  modo = m;
+  document.querySelectorAll('.modo-card').forEach(c => c.classList.remove('seleccionado'));
+  el.classList.add('seleccionado');
+  document.getElementById('config-normal').style.display   = m === 'normal'   ? 'block' : 'none';
+  document.getElementById('config-equipos').style.display  = m === 'equipos'  ? 'block' : 'none';
+  document.getElementById('config-vof').style.display      = m === 'vof'      ? 'block' : 'none';
+  document.getElementById('config-memorice').style.display = m === 'memorice' ? 'block' : 'none';
+}
+
+function seleccionarRondas(n, btn) {
+  totalRondas = n;
+  document.querySelectorAll('.btn-ronda').forEach(b => b.classList.remove('activo'));
+  btn.classList.add('activo');
+}
+
+// ── Inicio ─────────────────────────────────────────────────
+function iniciarJuego() {
+  rondaActual = 0; respondido = false;
+  ptsRojo = 0; ptsAzul = 0;
+  secuencia = mezclar([...TARJETAS]).slice(0, totalRondas);
+
+  if (modo === 'vof')      { iniciarVoF();      return; }
+  if (modo === 'memorice') { iniciarMemorice(); return; }
+
+  mostrarPantalla('pantalla-juego');
+
+  // Cabecera según modo
+  const esEquipos = modo === 'equipos';
+  document.getElementById('marcador-normal').style.display  = esEquipos ? 'none' : 'flex';
+  document.getElementById('marcador-equipos').style.display = esEquipos ? 'flex' : 'none';
+  document.getElementById('cont-correctas').textContent  = '0';
+  document.getElementById('cont-incorrectas').textContent= '0';
+
+  if (esEquipos) {
+    const nr = document.getElementById('nombre-rojo').value || 'Rojo';
+    const na = document.getElementById('nombre-azul').value || 'Azul';
+    document.getElementById('label-rojo').textContent = nr.toUpperCase();
+    document.getElementById('label-azul').textContent = na.toUpperCase();
+    document.getElementById('pts-rojo').textContent = '0';
+    document.getElementById('pts-azul').textContent = '0';
+  }
+
+  renderizarGrid();
+  mostrarPregunta();
+}
+
+// ── Pregunta ───────────────────────────────────────────────
+function mostrarPregunta() {
+  respondido = false;
+  pararTimer();
+
+  const t = secuencia[rondaActual];
+  tarjetaCorrecta = t;
+
+  // Limpiar estados tarjetas
+  document.querySelectorAll('.tarjeta').forEach(el => {
+    el.classList.remove('correcta','incorrecta','revelada','bloqueada','gana-rojo','gana-azul');
+    el.style.pointerEvents = '';
+  });
+
+  const pct = (rondaActual / totalRondas) * 100;
+  document.getElementById('barra-progreso').style.width = pct + '%';
+  document.getElementById('info-ronda').textContent = `Tarjeta ${rondaActual + 1} de ${totalRondas}`;
+
+  const imgEquipos = document.getElementById('imagen-equipos');
+
+  if (modo === 'normal') {
+    document.getElementById('etiqueta-pista').textContent = '📖 Lee esta descripción en voz alta:';
+    document.getElementById('texto-descripcion').textContent = t.desc;
+    document.getElementById('texto-descripcion').style.display = 'block';
+    imgEquipos.style.display = 'none';
+    document.getElementById('timer-wrap').classList.remove('visible');
+    document.getElementById('turno-label').style.display = 'none';
+  } else {
+    // Modo equipos: adivinanza corta arriba, grid con imágenes visibles
+    document.getElementById('etiqueta-pista').textContent = '🧩 ¿Quién soy?';
+    document.getElementById('texto-descripcion').textContent = t.pista;
+    document.getElementById('texto-descripcion').style.display = 'block';
+    imgEquipos.style.display = 'none';
+    document.getElementById('timer-wrap').classList.add('visible');
+    document.getElementById('turno-label').style.display = 'block';
+    document.getElementById('turno-label').textContent = '¡El primer equipo en hacer clic en la imagen correcta gana el punto!';
+    iniciarTimer();
+  }
+}
+
+function destacarTarjetaEquipos(t) {
+  // Oscurecer todas las tarjetas — la imagen es visible pero el nombre está oculto
+  document.querySelectorAll('.tarjeta').forEach(el => {
+    const pie = el.querySelector('.tarjeta-nombre');
+    const badge = el.querySelector('.badge');
+    if (pie) pie.style.opacity = '0';
+    if (badge) badge.style.opacity = '0';
+  });
+}
+
+// ── Timer (modo equipos) ───────────────────────────────────
+function iniciarTimer() {
+  tiempoRestante = TIEMPO_MAX;
+  actualizarTimer();
+  timerInterval = setInterval(() => {
+    tiempoRestante--;
+    actualizarTimer();
+    if (tiempoRestante <= 0) {
+      pararTimer();
+      if (!respondido) tiempoAgotado();
+    }
+  }, 1000);
+}
+
+function actualizarTimer() {
+  const pct    = (tiempoRestante / TIEMPO_MAX) * 100;
+  const barra  = document.getElementById('timer-barra');
+  const num    = document.getElementById('timer-numero');
+  const urgente = tiempoRestante <= 5;
+  const medio   = tiempoRestante <= 10;
+  barra.style.width      = pct + '%';
+  barra.style.background = urgente ? 'linear-gradient(90deg,#ef476f,#c0112f)' : medio ? 'linear-gradient(90deg,#ffd166,#ff9d00)' : 'linear-gradient(90deg,#06d6a0,#09d4a8)';
+  num.style.color        = urgente ? '#ef476f' : medio ? '#ffd166' : '#06d6a0';
+  num.textContent        = tiempoRestante;
+  num.classList.toggle('timer-urgente', urgente);
+}
+
+function pararTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+function tiempoAgotado() {
+  respondido = true;
+  revelarNombres();
+  // Revelar respuesta correcta
+  const correctaEl = document.querySelector(`.tarjeta[data-id="${tarjetaCorrecta.id}"]`);
+  if (correctaEl) correctaEl.classList.add('revelada');
+  mostrarOverlay('⏰', '¡Tiempo!', `Nadie respondió a tiempo. Era: ${tarjetaCorrecta.nombre}`, false);
+}
+
+// ── Grid ───────────────────────────────────────────────────
+function renderizarGrid() {
+  const grid = document.getElementById('grid-tarjetas');
+  grid.innerHTML = '';
+  mezclar([...TARJETAS]).forEach(t => {
+    const b = BADGE[t.cat];
+    const div = document.createElement('div');
+    div.className = 'tarjeta';
+    div.dataset.id = t.id;
+    div.innerHTML = `
+      <img src="${t.imagen}" alt="${t.nombre}" loading="lazy">
+      <div class="tarjeta-pie">
+        <div class="tarjeta-nombre">${t.nombre}</div>
+        <div class="badge ${b.cls}">${b.label}</div>
+      </div>`;
+    div.addEventListener('click', () => seleccionar(div, t));
+    grid.appendChild(div);
+  });
+}
+
+function revelarNombres() {
+  document.querySelectorAll('.tarjeta').forEach(el => {
+    const pie  = el.querySelector('.tarjeta-nombre');
+    const badge= el.querySelector('.badge');
+    if (pie)  pie.style.opacity  = '1';
+    if (badge) badge.style.opacity = '1';
+  });
+}
+
+// ── Selección ──────────────────────────────────────────────
+function seleccionar(el, t) {
+  if (respondido) return;
+
+  if (modo === 'normal') {
+    respondido = true;
+    const ok = t.id === tarjetaCorrecta.id;
+    if (ok) {
+      document.getElementById('cont-correctas').textContent =
+        parseInt(document.getElementById('cont-correctas').textContent) + 1;
+      el.classList.add('correcta');
+      mostrarOverlay('🎉', '¡Correcto!', `Es: ${t.nombre}`, true);
+    } else {
+      document.getElementById('cont-incorrectas').textContent =
+        parseInt(document.getElementById('cont-incorrectas').textContent) + 1;
+      el.classList.add('incorrecta');
+      const cEl = document.querySelector(`.tarjeta[data-id="${tarjetaCorrecta.id}"]`);
+      if (cEl) cEl.classList.add('revelada');
+      mostrarOverlay('😅', '¡Casi!', `La respuesta era: ${tarjetaCorrecta.nombre}`, false);
+    }
+
+  } else {
+    // Modo equipos — preguntar a qué equipo pertenece el clic
+    elegirEquipo(el, t);
+  }
+}
+
+// ── Modo equipos: elegir equipo ────────────────────────────
+function elegirEquipo(tarjetaEl, t) {
+  // Mostrar mini popup para que digan qué equipo hace el clic
+  const nr = document.getElementById('nombre-rojo').value || 'Rojo';
+  const na = document.getElementById('nombre-azul').value || 'Azul';
+
+  // Crear overlay pequeño temporal
+  const div = document.createElement('div');
+  div.id = 'eq-picker';
+  div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:60;display:flex;align-items:center;justify-content:center;';
+  div.innerHTML = `
+    <div style="background:#0f1f3d;border-radius:18px;padding:28px 36px;text-align:center;border:3px solid #ffd166;">
+      <p style="color:#cce4ff;margin-bottom:18px;font-size:.9rem;">¿Qué equipo responde?</p>
+      <div style="display:flex;gap:14px;justify-content:center;">
+        <button onclick="registrarRespuesta('rojo','${tarjetaEl.dataset.id}',${t.id})"
+          style="padding:12px 26px;border:none;border-radius:12px;background:#ef476f;color:#fff;font-size:1rem;font-weight:800;cursor:pointer;">${nr}</button>
+        <button onclick="registrarRespuesta('azul','${tarjetaEl.dataset.id}',${t.id})"
+          style="padding:12px 26px;border:none;border-radius:12px;background:#118ab2;color:#fff;font-size:1rem;font-weight:800;cursor:pointer;">${na}</button>
+        <button onclick="document.getElementById('eq-picker').remove()"
+          style="padding:12px 18px;border:none;border-radius:12px;background:#3a4a6a;color:#cce4ff;font-size:.9rem;cursor:pointer;">✕</button>
+      </div>
+    </div>`;
+  document.body.appendChild(div);
+}
+
+function registrarRespuesta(equipo, tarjetaClickId, tarjetaId) {
+  document.getElementById('eq-picker')?.remove();
+  if (respondido) return;
+  respondido = true;
+  pararTimer();
+  revelarNombres();
+
+  const ok = parseInt(tarjetaClickId) === tarjetaCorrecta.id;
+  const tarjetaEl = document.querySelector(`.tarjeta[data-id="${tarjetaClickId}"]`);
+  const nr = document.getElementById('nombre-rojo').value || 'Rojo';
+  const na = document.getElementById('nombre-azul').value || 'Azul';
+  const nombreEquipo = equipo === 'rojo' ? nr : na;
+
+  if (ok) {
+    if (equipo === 'rojo') { ptsRojo++; document.getElementById('pts-rojo').textContent = ptsRojo; }
+    else                   { ptsAzul++; document.getElementById('pts-azul').textContent = ptsAzul; }
+    tarjetaEl?.classList.add(equipo === 'rojo' ? 'gana-rojo' : 'gana-azul');
+    mostrarOverlay(
+      equipo === 'rojo' ? '🔴' : '🔵',
+      `¡${nombreEquipo} anota!`,
+      `Correcto: ${tarjetaCorrecta.nombre}`,
+      true
+    );
+  } else {
+    tarjetaEl?.classList.add('incorrecta');
+    const cEl = document.querySelector(`.tarjeta[data-id="${tarjetaCorrecta.id}"]`);
+    if (cEl) cEl.classList.add('revelada');
+    mostrarOverlay('😅', `${nombreEquipo} falló`, `La respuesta era: ${tarjetaCorrecta.nombre}`, false);
+  }
+}
+
+// ── Overlay ────────────────────────────────────────────────
+function mostrarOverlay(icono, titulo, subtitulo, ok) {
+  document.getElementById('overlay-icono').textContent    = icono;
+  document.getElementById('overlay-titulo').textContent   = titulo;
+  document.getElementById('overlay-subtitulo').textContent= subtitulo;
+  document.getElementById('overlay').classList.add('visible');
+}
+
+function cerrarOverlay() { document.getElementById('overlay').classList.remove('visible'); }
+
+// ── Final ──────────────────────────────────────────────────
+function mostrarFinal() {
+  pararTimer();
+  clearInterval(vofTimer);
+  mostrarPantalla('final');
+
+  if (modo === 'normal') {
+    const c = parseInt(document.getElementById('cont-correctas').textContent);
+    document.getElementById('puntaje-final').style.display = 'block';
+    document.getElementById('puntaje-final').innerHTML = `${c} <span>/ ${totalRondas}</span>`;
+    document.getElementById('marcador-final-equipos').style.display = 'none';
+    document.getElementById('ganador-equipos').style.display = 'none';
+    const pct = Math.round((c / totalRondas) * 100);
+    document.getElementById('mensaje-final').textContent =
+      pct === 100 ? '¡Perfecto! Conoces todo el patrimonio de Tomé. 🏆' :
+      pct >= 75   ? '¡Muy bien! Gran conocimiento del patrimonio tomecino. 🌟' :
+      pct >= 50   ? 'Buen intento. Sigue aprendiendo sobre tu ciudad. 📚' :
+                    'El patrimonio de Tomé tiene mucho por descubrir. 💪';
+  } else {
+    const nr = modo === 'vof'
+      ? (document.getElementById('vof-nombre-rojo').value || 'Rojo')
+      : (document.getElementById('nombre-rojo').value || 'Rojo');
+    const na = modo === 'vof'
+      ? (document.getElementById('vof-nombre-azul').value || 'Azul')
+      : (document.getElementById('nombre-azul').value || 'Azul');
+    document.getElementById('puntaje-final').style.display = 'none';
+    document.getElementById('marcador-final-equipos').style.display = 'flex';
+    document.getElementById('final-label-rojo').textContent = nr.toUpperCase();
+    document.getElementById('final-label-azul').textContent = na.toUpperCase();
+    document.getElementById('final-pts-rojo').textContent = ptsRojo;
+    document.getElementById('final-pts-azul').textContent = ptsAzul;
+
+    const ganador = document.getElementById('ganador-equipos');
+    ganador.style.display = 'block';
+    if (ptsRojo > ptsAzul) {
+      ganador.textContent = `🏆 ¡Gana ${nr}!`;
+      ganador.style.cssText += 'background:#6b1a2a;border:3px solid #ef476f;color:#ef476f;';
+    } else if (ptsAzul > ptsRojo) {
+      ganador.textContent = `🏆 ¡Gana ${na}!`;
+      ganador.style.cssText += 'background:#1a2a6b;border:3px solid #118ab2;color:#118ab2;';
+    } else {
+      ganador.textContent = '🤝 ¡Empate!';
+      ganador.style.cssText += 'background:#2a2a4a;border:3px solid #ffd166;color:#ffd166;';
+    }
+    document.getElementById('mensaje-final').textContent =
+      `${nr}: ${ptsRojo} punto${ptsRojo!==1?'s':''} · ${na}: ${ptsAzul} punto${ptsAzul!==1?'s':''}`;
+  }
+}
+
+// ── Reiniciar ──────────────────────────────────────────────
+function reiniciar() {
+  clearInterval(memTimerInt);
+  pararTimer();
+  clearInterval(vofTimer);
+  document.getElementById('final').querySelector('h1').textContent = '¡Juego terminado!';
+  mostrarPantalla('inicio');
+}
+
+// ── Utilidades ─────────────────────────────────────────────
+function mostrarPantalla(id) {
+  ['inicio','pantalla-juego','pantalla-vof','pantalla-memorice','final'].forEach(pid => {
+    const el = document.getElementById(pid);
+    if (['pantalla-juego','pantalla-vof','pantalla-memorice'].includes(pid)) {
+      el.style.display = 'none';
+      el.classList.remove('activo');
+      if (pid === id) { el.style.display = 'flex'; el.classList.add('activo'); }
+    } else {
+      el.classList.toggle('activa', pid === id);
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// MODO MEMORICE
+// ══════════════════════════════════════════════════════════
+let memPares       = 6;
+let memCartas      = [];
+let memVoltadas    = [];
+let memEmparejadas = new Set();
+let memIntentos    = 0;
+let memTiempoSeg   = 0;
+let memTimerInt    = null;
+let memBloqueado   = false;
+
+function seleccionarParesMem(n, btn) {
+  memPares = n;
+  document.querySelectorAll('#config-memorice .btn-ronda').forEach(b => b.classList.remove('activo'));
+  btn.classList.add('activo');
+}
+
+function iniciarMemorice() {
+  memVoltadas = []; memEmparejadas = new Set();
+  memIntentos = 0; memTiempoSeg = 0; memBloqueado = false;
+  clearInterval(memTimerInt);
+
+  // Seleccionar N tarjetas aleatorias
+  const seleccion = mezclar([...TARJETAS]).slice(0, memPares);
+
+  // Crear pares: carta imagen + carta descripción
+  memCartas = [];
+  seleccion.forEach(t => {
+    memCartas.push({ tipo: 'imagen', id: t.id, tarjeta: t, uid: `img-${t.id}` });
+    memCartas.push({ tipo: 'desc',   id: t.id, tarjeta: t, uid: `desc-${t.id}` });
+  });
+  memCartas = mezclar(memCartas);
+
+  // Configurar grid según pares
+  const grid = document.getElementById('grid-memorice');
+  const cols = memPares <= 6 ? 4 : memPares <= 8 ? 4 : memPares <= 12 ? 6 : 8;
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+  mostrarPantalla('pantalla-memorice');
+  document.getElementById('mem-info-pares').textContent = `${memPares} pares · ${memPares * 2} cartas`;
+  actualizarEstadoMem();
+  renderizarMemorice();
+
+  // Timer
+  memTimerInt = setInterval(() => {
+    memTiempoSeg++;
+    const m = Math.floor(memTiempoSeg / 60);
+    const s = String(memTiempoSeg % 60).padStart(2, '0');
+    document.getElementById('mem-tiempo-val').textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function renderizarMemorice() {
+  const grid = document.getElementById('grid-memorice');
+  grid.innerHTML = '';
+  const BADGE_LABELS = { natural:'Cultural Natural', material:'Cultural Material', inmaterial:'Cultural Inmaterial' };
+  const BADGE_COLORS = { natural:'#5ff0a8', material:'#7dd4f0', inmaterial:'#ffb86c' };
+
+  memCartas.forEach(carta => {
+    const div = document.createElement('div');
+    div.className = 'mem-carta';
+    div.dataset.uid = carta.uid;
+    div.dataset.id  = carta.id;
+
+    if (carta.tipo === 'imagen') {
+      div.innerHTML = `
+        <div class="mem-carta-inner">
+          <div class="mem-cara"></div>
+          <div class="mem-contenido tipo-imagen">
+            <img src="${carta.tarjeta.imagen}" alt="${carta.tarjeta.nombre}">
+            <div class="mem-img-pie">
+              <div class="mem-img-nombre">${carta.tarjeta.nombre}</div>
+              <span class="mem-img-badge" style="background:rgba(${carta.tarjeta.cat==='natural'?'6,180,90':carta.tarjeta.cat==='material'?'17,138,178':'255,140,50'},.25);color:${BADGE_COLORS[carta.tarjeta.cat]};border:1px solid rgba(${carta.tarjeta.cat==='natural'?'6,180,90':carta.tarjeta.cat==='material'?'17,138,178':'255,140,50'},.4);">${BADGE_LABELS[carta.tarjeta.cat]}</span>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      div.innerHTML = `
+        <div class="mem-carta-inner">
+          <div class="mem-cara"></div>
+          <div class="mem-contenido tipo-desc">
+            <div class="mem-desc-etiqueta">📖 Descripción</div>
+            <div class="mem-desc-texto">${carta.tarjeta.pista.replace('¿Quién soy?','').replace('¿Quiénes somos?','').replace('¿Qué soy?','').trim()}</div>
+          </div>
+        </div>`;
+    }
+
+    div.addEventListener('click', () => voltearCartaMem(div, carta));
+    grid.appendChild(div);
+  });
+}
+
+function voltearCartaMem(el, carta) {
+  if (memBloqueado) return;
+  if (el.classList.contains('volteada') || el.classList.contains('emparejada')) return;
+  if (memVoltadas.length === 2) return;
+
+  el.classList.add('volteada');
+  memVoltadas.push({ el, carta });
+
+  if (memVoltadas.length === 2) {
+    memIntentos++;
+    actualizarEstadoMem();
+    memBloqueado = true;
+
+    const [a, b] = memVoltadas;
+    if (a.carta.id === b.carta.id) {
+      // ¡Par encontrado!
+      setTimeout(() => {
+        a.el.classList.add('emparejada');
+        b.el.classList.add('emparejada');
+        memEmparejadas.add(a.carta.id);
+        memVoltadas = [];
+        memBloqueado = false;
+        actualizarEstadoMem();
+        if (memEmparejadas.size === memPares) terminarMemorice();
+      }, 500);
+    } else {
+      // No coinciden
+      setTimeout(() => {
+        a.el.classList.add('error-flip');
+        b.el.classList.add('error-flip');
+        setTimeout(() => {
+          a.el.classList.remove('volteada', 'error-flip');
+          b.el.classList.remove('volteada', 'error-flip');
+          memVoltadas = [];
+          memBloqueado = false;
+        }, 500);
+      }, 800);
+    }
+  }
+}
+
+function actualizarEstadoMem() {
+  document.getElementById('mem-intentos-val').textContent = memIntentos;
+  document.getElementById('mem-pares-val').textContent    = `${memEmparejadas.size}/${memPares}`;
+  const pct = (memEmparejadas.size / memPares) * 100;
+  document.getElementById('barra-progreso-mem').style.width = pct + '%';
+}
+
+function terminarMemorice() {
+  clearInterval(memTimerInt);
+  const m = Math.floor(memTiempoSeg / 60);
+  const s = String(memTiempoSeg % 60).padStart(2,'0');
+  const eficiencia = Math.max(0, Math.round(100 - ((memIntentos - memPares) / memPares) * 50));
+
+  document.getElementById('puntaje-final').style.display     = 'none';
+  document.getElementById('marcador-final-equipos').style.display = 'none';
+  document.getElementById('ganador-equipos').style.display   = 'none';
+
+  document.getElementById('final').querySelector('h1').textContent = '¡Memorice completado!';
+  document.getElementById('mensaje-final').innerHTML = `
+    <div id="mem-final-stats">
+      <div class="mem-final-chip"><div class="chip-val">${memIntentos}</div><div class="chip-label">Intentos</div></div>
+      <div class="mem-final-chip"><div class="chip-val">${m}:${s}</div><div class="chip-label">Tiempo</div></div>
+      <div class="mem-final-chip"><div class="chip-val">${eficiencia}%</div><div class="chip-label">Eficiencia</div></div>
+    </div>
+    <p style="margin-top:16px; color:rgba(255,255,255,.5); font-size:.9rem;">
+    ${eficiencia >= 90 ? '🏆 ¡Memoria perfecta!' : eficiencia >= 70 ? '🌟 ¡Muy buena memoria!' : eficiencia >= 50 ? '📚 Buen intento, sigue practicando.' : '💪 Con más práctica lo lograrás.'}
+    </p>`;
+  mostrarPantalla('final');
+}
+
+// ══════════════════════════════════════════════════════════
+// MODO VERDADERO O FALSO
+// ══════════════════════════════════════════════════════════
+const VOF_TIEMPO = 15;
+let vofTimer = null, vofTiempo = 0;
+let vofRespuestaCorrecta = '';   // 'v' o 'f'
+let vofRespondio = { rojo: false, azul: false };
+
+function iniciarVoF() {
+  const nr = document.getElementById('vof-nombre-rojo').value || 'Rojo';
+  const na = document.getElementById('vof-nombre-azul').value || 'Azul';
+  document.getElementById('vof-label-rojo').textContent   = nr.toUpperCase();
+  document.getElementById('vof-label-azul').textContent   = na.toUpperCase();
+  document.getElementById('vof-rlabel-rojo').textContent  = nr.toUpperCase();
+  document.getElementById('vof-rlabel-azul').textContent  = na.toUpperCase();
+  document.getElementById('vof-pts-rojo').textContent = '0';
+  document.getElementById('vof-pts-azul').textContent = '0';
+  mostrarPantalla('pantalla-vof');
+  mostrarRondaVoF();
+}
+
+function mostrarRondaVoF() {
+  clearInterval(vofTimer);
+  vofRespondio = { rojo: false, azul: false };
+
+  const t = secuencia[rondaActual];
+
+  // 50% verdadero (pista propia), 50% falso (afirmación engañosa específica)
+  const esVerdadero = Math.random() < 0.5;
+  let afirmacion;
+  if (esVerdadero) {
+    afirmacion = t.pista.replace('¿Quién soy?','').replace('¿Quiénes somos?','').replace('¿Qué soy?','').trim();
+    vofRespuestaCorrecta = 'v';
+  } else {
+    afirmacion = t.falso;
+    vofRespuestaCorrecta = 'f';
+  }
+
+  document.getElementById('vof-imagen').src = t.imagen;
+  document.getElementById('vof-texto').textContent = afirmacion;
+  document.getElementById('vof-info-ronda').textContent = `Ronda ${rondaActual + 1} de ${totalRondas}`;
+  document.getElementById('barra-progreso-vof').style.width = ((rondaActual / totalRondas) * 100) + '%';
+
+  // Rehabilitar botones
+  ['vof-r-v','vof-r-f','vof-a-v','vof-a-f'].forEach(id => {
+    const b = document.getElementById(id);
+    b.disabled = false;
+    b.classList.remove('acierto','error');
+  });
+
+  // Timer
+  vofTiempo = VOF_TIEMPO;
+  actualizarTimerVoF();
+  vofTimer = setInterval(() => {
+    vofTiempo--;
+    actualizarTimerVoF();
+    if (vofTiempo <= 0) {
+      clearInterval(vofTimer);
+      if (!vofRespondio.rojo && !vofRespondio.azul) revelarVoF(null);
+    }
+  }, 1000);
+}
+
+function actualizarTimerVoF() {
+  const pct     = (vofTiempo / VOF_TIEMPO) * 100;
+  const barra   = document.getElementById('vof-timer-barra');
+  const num     = document.getElementById('vof-timer-num');
+  const urgente = vofTiempo <= 5;
+  const medio   = vofTiempo <= 8;
+  barra.style.width      = pct + '%';
+  barra.style.background = urgente ? 'linear-gradient(90deg,#ef476f,#c0112f)' : medio ? 'linear-gradient(90deg,#ffd166,#ff9d00)' : 'linear-gradient(90deg,#06d6a0,#09d4a8)';
+  num.style.color        = urgente ? '#ef476f' : medio ? '#ffd166' : '#06d6a0';
+  num.textContent        = vofTiempo;
+  num.classList.toggle('timer-urgente', urgente);
+}
+
+function votarVoF(equipo, voto) {
+  if (vofRespondio[equipo]) return;
+  vofRespondio[equipo] = true;
+
+  const acierto = voto === vofRespuestaCorrecta;
+  const btnId = equipo === 'rojo'
+    ? (voto === 'v' ? 'vof-r-v' : 'vof-r-f')
+    : (voto === 'v' ? 'vof-a-v' : 'vof-a-f');
+
+  document.getElementById(btnId).classList.add(acierto ? 'acierto' : 'error');
+  // Bloquear ambos botones del equipo
+  document.getElementById(equipo === 'rojo' ? 'vof-r-v' : 'vof-a-v').disabled = true;
+  document.getElementById(equipo === 'rojo' ? 'vof-r-f' : 'vof-a-f').disabled = true;
+
+  if (acierto) {
+    clearInterval(vofTimer);
+    if (equipo === 'rojo') {
+      ptsRojo++;
+      document.getElementById('vof-pts-rojo').textContent = ptsRojo;
+    } else {
+      ptsAzul++;
+      document.getElementById('vof-pts-azul').textContent = ptsAzul;
+    }
+    // Esperar 1.2s y revelar antes de avanzar
+    setTimeout(() => revelarVoF(equipo), 1200);
+  } else {
+    // Si ambos fallaron, revelar
+    if (vofRespondio.rojo && vofRespondio.azul) {
+      clearInterval(vofTimer);
+      setTimeout(() => revelarVoF(null), 800);
+    }
+  }
+}
+
+function revelarVoF(ganador) {
+  // Mostrar la respuesta correcta iluminando el botón correcto
+  const sufijo = vofRespuestaCorrecta; // 'v' o 'f'
+  ['rojo','azul'].forEach(eq => {
+    const btnCorrecto = document.getElementById(`vof-${eq === 'rojo' ? 'r' : 'a'}-${sufijo}`);
+    btnCorrecto.disabled = false;
+    if (!btnCorrecto.classList.contains('acierto')) btnCorrecto.classList.add('acierto');
+  });
+
+  const nr = document.getElementById('vof-nombre-rojo').value || 'Rojo';
+  const na = document.getElementById('vof-nombre-azul').value || 'Azul';
+  const t  = secuencia[rondaActual];
+  const era = vofRespuestaCorrecta === 'v' ? '✅ VERDADERO' : '❌ FALSO';
+
+  let icono, titulo, sub;
+  if (ganador === 'rojo')   { icono='🔴'; titulo=`¡${nr} anota!`;    sub=`La afirmación era ${era} — ${t.nombre}`; }
+  else if (ganador === 'azul') { icono='🔵'; titulo=`¡${na} anota!`; sub=`La afirmación era ${era} — ${t.nombre}`; }
+  else                         { icono='⏰'; titulo='¡Nadie anotó!'; sub=`La afirmación era ${era} — ${t.nombre}`; }
+
+  document.getElementById('overlay-icono').textContent     = icono;
+  document.getElementById('overlay-titulo').textContent    = titulo;
+  document.getElementById('overlay-subtitulo').textContent = sub;
+  document.getElementById('overlay').classList.add('visible');
+}
+
+function siguientePregunta() {
+  cerrarOverlay();
+  rondaActual++;
+  if (rondaActual >= totalRondas) {
+    mostrarFinal();
+  } else {
+    if (modo === 'vof') mostrarRondaVoF();
+    else mostrarPregunta();
+  }
+}
+
+function mezclar(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+</script>
+</body>
+</html>
